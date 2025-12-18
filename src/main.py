@@ -59,7 +59,8 @@ def tool_ui(func):
 
         # execute
         try:
-            result = func(*args, **kwargs)
+            msg, result = func(*args, **kwargs)
+            console.print(Text(msg), style='dim')
         except Exception as err:
             error_msg = f"tool call failed with error: {str(err)}"
             result = error_msg
@@ -90,18 +91,22 @@ def is_path_permitted(path: str):
 
 
 @tool_ui
-def read_file(path: str) -> str:
+def read_file(path: str) -> tuple[str, list]:
     """Read a text file from the project directory.
 
     Args:
         path: Path to a text file (can be relative or absolute).
     """
     target = is_path_permitted(path)
-    return target.read_text(encoding="utf-8")
+    result = target.read_text(encoding="utf-8")
+
+    num_lines = result.count('\n') + 1 if result.strip() else 0
+    msg = f"Read {num_lines} lines"
+    return msg, [result]
 
 
 @tool_ui
-def list_files(path: str) -> str:
+def list_files(path: str) -> tuple[str, list]:
     """
     List all files and directories in a given path.
 
@@ -110,7 +115,9 @@ def list_files(path: str) -> str:
     """
     target_dir = is_path_permitted(path)
     entries = os.listdir(target_dir)
-    return "\n".join(entries)
+
+    msg = f"Listed {len(entries)}"
+    return msg, entries
 
 
 @tool_ui
