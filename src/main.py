@@ -1,18 +1,18 @@
+import inspect
+import json
 import os
 import sys
-import json
-import inspect
-
-from typing import get_type_hints, get_origin
-from dotenv import load_dotenv
-from pathlib import Path
 from functools import wraps
+from pathlib import Path
+from typing import get_origin
+from typing import get_type_hints
 
 import dspy
 
+from dotenv import load_dotenv
+
 from google import genai
 from google.genai import types
-
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.text import Text
@@ -61,7 +61,7 @@ def tool_ui(func):
         # execute
         try:
             msg, result = func(*args, **kwargs)
-            console.print(Text(msg), style='dim')
+            console.print(Text(msg), style="dim")
         except Exception as err:
             error_msg = f"tool call failed with error: {str(err)}"
             result = error_msg
@@ -101,7 +101,7 @@ def read_file(path: str) -> tuple[str, list]:
     target = is_path_permitted(path)
     result = target.read_text(encoding="utf-8")
 
-    num_lines = result.count('\n') + 1 if result.strip() else 0
+    num_lines = result.count("\n") + 1 if result.strip() else 0
     msg = f"Read {num_lines} lines"
     return msg, [result]
 
@@ -206,7 +206,9 @@ class Agent:
                 console.print("[yellow]no text output[/yellow]")
                 continue
 
-            console.print(Text("gemini: ", style="bold yellow"), Text(assistant_text.rstrip()))
+            console.print(
+                Text("gemini: ", style="bold yellow"), Text(assistant_text.rstrip())
+            )
 
             self.history.append(
                 types.Content(
