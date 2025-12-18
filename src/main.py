@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import json
 import inspect
 
@@ -57,33 +58,35 @@ def tool_ui(func):
         )
 
         # execute
-        result = func(*args, **kwargs)
-
-        # render result
-        ret_hint = hints.get("return")
-        origin = get_origin(ret_hint)
-        is_structured = (
-            origin in (dict, list)
-            or ret_hint in (dict, list)
-            or isinstance(result, (dict, list))
-        )
-
-        if is_structured:
-            try:
-                preview = json.dumps(result, indent=2)
-            except Exception:
-                preview = str(result)
-        else:
-            preview = str(result)
-
-        if len(preview) > 400:
-            preview = preview[:400] + "…"
-
-        console.print(Text(preview, style="dim"))
+        try:
+            result = func(*args, **kwargs)
+        except Exception as err:
+            error_msg = f"tool call failed with error: {str(err)}"
+            result = error_msg
+            truncated_err = str(err)[:280]
+            console.print(Text("Error", style="red"), Text(truncated_err))
 
         return result
 
     return wrapper
+
+
+def is_path_permitted(path: str):
+    """Check whether a path is within the project directory.
+
+    Args:
+        path: Path to check (can be relative or absolute)
+
+    Raises:
+        PermissionError: If path escapes the project directory
+    """
+    base = Path.cwd().resolve()
+    target = Path(path).resolve()
+
+    if not str(target).startswith(str(base)):
+        raise PermissionError("error: path escapes project directory")
+
+    return target
 
 
 @tool_ui
@@ -91,36 +94,23 @@ def read_file(path: str) -> str:
     """Read a text file from the project directory.
 
     Args:
-        path: Relative path to a text file.
+        path: Path to a text file (can be relative or absolute).
     """
-
-    base = Path.cwd().resolve()
-    target = (base / path).resolve()
-
-    if not str(target).startswith(str(base)):
-        return "error: path escapes project directory"
-
-    if not target.exists() or not target.is_file():
-        return "error: file not found"
-
+    target = is_path_permitted(path)
     return target.read_text(encoding="utf-8")
 
 
 @tool_ui
-def list_files(list_file_path: str = "file_list.txt") -> str:
+def list_files(path: str) -> str:
     """
-    Reads a file containing a list of files in the project.
-    The list should be manually maintained.
+    List all files and directories in a given path.
 
     Args:
-        list_file_path: The path to the file containing the list of files.
+        path: Path to the directory to list (can be relative or absolute).
     """
-    try:
-        with open(list_file_path, "r") as f:
-            files = f.read()
-        return files
-    except FileNotFoundError:
-        return "Error: file_list.txt not found. Please create this file with a list of project files."
+    target_dir = is_path_permitted(path)
+    entries = os.listdir(target_dir)
+    return "\n".join(entries)
 
 
 @tool_ui
@@ -144,6 +134,7 @@ class Agent:
         self._tools = [
             # types.Tool(code_execution=types.ToolCodeExecution()),
             read_file,
+            list_files,
         ]
 
     def run(self):
@@ -207,7 +198,7 @@ class Agent:
                 console.print("[yellow]no text output[/yellow]")
                 continue
 
-            console.print(Text("gemini: ", style="bold yellow"), Text(assistant_text))
+            console.print(Text("gemini: ", style="bold yellow"), Text(assistant_text.rstrip()))
 
             self.history.append(
                 types.Content(
