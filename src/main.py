@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from functools import wraps
 
+import dspy
 
 from google import genai
 from google.genai import types
@@ -26,7 +27,7 @@ client = genai.Client(api_key=API_KEY)
 
 console = Console()
 
-MODEL = "gemini-2.0-flash"
+MODEL = "gemini-2.5-flash"
 
 
 def tool_ui(func):
