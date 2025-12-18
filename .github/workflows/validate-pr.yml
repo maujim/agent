@@ -1,0 +1,15 @@
+name: Validate PR Configuration
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-merge-method:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PR is ready for squash merge
+        run: |
+          echo "PR #${{ github.event.number }} is ready for review"
+          echo "This repository uses 'Squash and merge' as the default merge method"
+          echo "When merging, please use 'Squash and merge' to keep the commit history clean"

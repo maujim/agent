@@ -1,0 +1,22 @@
+# Branch Protection Configuration for Main Branch
+#
+# This file documents the desired branch protection settings for the main branch.
+# Apply these settings in GitHub repository settings:
+# https://github.com/maujim/agent/settings/branches
+#
+# Required settings:
+# - Branch: main
+# - Require pull request reviews before merging: OFF
+# - Require status checks to pass before merging: OPTIONAL
+# - Allow force pushes: OFF
+# - Allow deletions: OFF
+#
+# Pull request settings:
+# - Automatically delete head branches: ON
+# - Set as default merge method: Squash and merge
+#
+# Repository settings (Settings > General):
+# - Default branch: main
+# - Allow squash merge: ON
+# - Allow merge commits: OFF
+# - Allow rebase merging: OFF
