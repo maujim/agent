@@ -106,6 +106,36 @@ def read_file(path: str) -> str:
     return target.read_text(encoding="utf-8")
 
 
+@tool_ui
+def list_files(list_file_path: str = "file_list.txt") -> str:
+    """
+    Reads a file containing a list of files in the project.
+    The list should be manually maintained.
+
+    Args:
+        list_file_path: The path to the file containing the list of files.
+    """
+    try:
+        with open(list_file_path, "r") as f:
+            files = f.read()
+        return files
+    except FileNotFoundError:
+        return "Error: file_list.txt not found. Please create this file with a list of project files."
+
+
+@tool_ui
+def edit_file(path: str, instructions: str) -> str:
+    """
+    Provides instructions to the user on how to edit a file.
+    This tool cannot directly edit files.
+
+    Args:
+        path: The path to the file to be edited.
+        instructions: Instructions on how to edit the file.
+    """
+    return f"To edit the file '{path}', follow these instructions:\n{instructions}\n\nNote: I cannot directly edit the file. You need to manually make these changes."
+
+
 class Agent:
     def __init__(self, client):
         self.client = client
