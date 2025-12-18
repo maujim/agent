@@ -1,7 +1,8 @@
-import os, sys, json
+import os, sys
+import json
 import inspect
 
-from typing import get_type_hints
+from typing import get_type_hints, get_origin
 from dotenv import load_dotenv
 from pathlib import Path
 from functools import wraps
@@ -13,8 +14,6 @@ from google.genai import types
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.text import Text
-
-# ---------- setup ----------
 
 load_dotenv()
 
@@ -28,14 +27,12 @@ console = Console()
 
 MODEL = "gemini-2.0-flash"
 
-# ---------- agent ----------
 
-def tool_ui(func, detailed=False):
+def tool_ui(func):
     """
-    Decorator for Gemini tools that logs tool calls/results to Rich UI
-    without interfering with Gemini's schema inference.
+    Simple decorator for Gemini tools that logs calls/results to Rich UI.
+    Preserves type hints and docstring for schema detection.
     """
-
     sig = inspect.signature(func)
     hints = get_type_hints(func)
     doc = inspect.getdoc(func) or ""
@@ -46,43 +43,50 @@ def tool_ui(func, detailed=False):
         "doc": doc,
         "name": func.__name__,
     }
+    func.__tool_meta__ = tool_meta
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # show tool call
-        arg_str = []
-        arg_str.extend(repr(a) for a in args)
-        arg_str.extend(f"{k}={v!r}" for k, v in kwargs.items())
+        # bind args
+        bound = sig.bind_partial(*args, **kwargs)
+        bound.apply_defaults()
 
+        arg_str = ", ".join(f"{k}={v!r}" for k, v in bound.arguments.items())
         console.print(
-            "[bold green]tool:[/bold green]",
-            f"{func.__name__}({', '.join(arg_str)})",
+            "[bold green]tool[/bold green]:", Text(f"{func.__name__}({arg_str})")
         )
 
+        # execute
         result = func(*args, **kwargs)
 
-        # show tool result (truncate aggressively)
-        preview = result
-        if tool_meta['hints']['return'] _____ or isinstance(result, (dict, list)):
-            preview = json.dumps(result, indent=2)
+        # render result
+        ret_hint = hints.get("return")
+        origin = get_origin(ret_hint)
+        is_structured = (
+            origin in (dict, list)
+            or ret_hint in (dict, list)
+            or isinstance(result, (dict, list))
+        )
+
+        if is_structured:
+            try:
+                preview = json.dumps(result, indent=2)
+            except Exception:
+                preview = str(result)
         else:
             preview = str(result)
 
         if len(preview) > 400:
             preview = preview[:400] + "…"
 
-        console.print(
-            Text(
-                preview,
-                style="dim",
-            )
-        )
+        console.print(Text(preview, style="dim"))
 
         return result
 
     return wrapper
 
-@tool_ui(detailed=True)
+
+@tool_ui
 def read_file(path: str) -> str:
     """Read a text file from the project directory.
 
@@ -162,7 +166,6 @@ class Agent:
             #         item: types.FunctionCall = ff
             #         console.print(item)
 
-
             parts = response.candidates[0].content.parts
 
             assistant_text = ""
@@ -174,7 +177,7 @@ class Agent:
                 console.print("[yellow]no text output[/yellow]")
                 continue
 
-            console.print(Text("gemini: ", style="bold yellow") + Text(assistant_text))
+            console.print(Text("gemini: ", style="bold yellow"), Text(assistant_text))
 
             self.history.append(
                 types.Content(
@@ -182,9 +185,6 @@ class Agent:
                     parts=[types.Part(text=assistant_text)],
                 )
             )
-
-
-# ---------- main ----------
 
 
 def main():
