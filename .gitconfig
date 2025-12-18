@@ -1,0 +1,9 @@
+# Git configuration for this repository
+# Place this in .git/config or run these commands:
+#
+# git config merge.ff only
+# git config pull.ff only
+# git config merge.renames true
+#
+# To create PRs that default to squash merge, use:
+# gh pr create --title "Your PR title" --body "Your description" --base main
