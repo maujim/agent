@@ -171,7 +171,7 @@ class Agent:
                         contents=self.history,
                         config=types.GenerateContentConfig(
                             max_output_tokens=1024,
-                            temperature=0.7,
+                            temperature=0.95,
                             tools=self._tools,
                             # automatic_function_calling=types.AutomaticFunctionCallingConfig(
                             #     disable=True
