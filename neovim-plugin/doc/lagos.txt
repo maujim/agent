@@ -1,0 +1,280 @@
+*lagos.txt*    AI-powered coding assistant for NeoVim using Google's Gemini AI
+
+                         ████████╗███████╗██████╗ ███╗   ███╗
+                         ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║
+                            ██║   █████╗  ██████╔╝██╔████╔██║
+                            ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║
+                            ██║   ███████╗██║  ██║██║ ╚═╝ ██║
+                            ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝
+
+Author: Mukund <mukund@lagos.ai>
+License: Same terms as NeoVim itself (see |license|)
+Repository: https://github.com/mukund/conductor/lagos
+
+==============================================================================
+CONTENTS                                          *lagos-contents*
+
+1. Introduction ................................. |lagos-introduction|
+2. Requirements .................................. |lagos-requirements|
+3. Installation .................................. |lagos-installation|
+4. Configuration .................................. |lagos-configuration|
+5. Commands ....................................... |lagos-commands|
+6. Key Mappings .................................. |lagos-mappings|
+7. Features ...................................... |lagos-features|
+8. Examples ...................................... |lagos-examples|
+9. Troubleshooting ............................... |lagos-troubleshooting|
+
+==============================================================================
+1. INTRODUCTION                                     *lagos-introduction*
+
+Lagos is an AI-powered coding assistant plugin for NeoVim that integrates
+Google's Gemini AI directly into your editor. It provides intelligent code
+assistance, explanations, refactoring suggestions, and fixes without leaving
+your NeoVim environment.
+
+With Lagos, you can:
+- Ask questions about your code
+- Get explanations of selected code
+- Receive suggestions for fixing bugs
+- Refactor code for better readability and performance
+- Maintain an interactive chat session with the AI
+
+==============================================================================
+2. REQUIREMENTS                                   *lagos-requirements*
+
+- NeoVim 0.5.0 or newer
+- A Google AI API key (get one from https://makersuite.google.com/app/apikey)
+- Python 3.10 or higher (for the Lagos backend)
+- An active internet connection
+
+==============================================================================
+3. INSTALLATION                                   *lagos-installation*
+
+USING vim-plug ~
+
+Add the following to your |vimrc| or `init.vim`:
+
+>
+    Plug 'mukund/conductor/lagos', {'rtp': 'neovim-plugin'}
+<
+
+MANUAL INSTALLATION ~
+
+1. Clone the repository:
+>
+    git clone https://github.com/mukund/conductor/lagos.git
+    cd lagos
+<
+
+2. Add to your runtime path in `init.lua`:
+>
+    vim.opt.runtimepath:append("/path/to/lagos/neovim-plugin")
+<
+
+3. Set up the plugin (see |lagos-configuration|)
+
+==============================================================================
+4. CONFIGURATION                                   *lagos-configuration*
+
+Basic setup in your `init.lua`:
+
+>
+    require('lagos').setup({
+        api_key = os.getenv("GOOGLE_AI_API_KEY"),
+        model = "gemini-2.5-flash",
+        chat_window = {
+            width = 80,
+            height = 20,
+            position = "right",
+            border = "rounded",
+        },
+        mappings = {
+            ask = "<leader>la",
+            chat = "<leader>lc",
+            explain = "<leader>le",
+            fix = "<leader>lf",
+            refactor = "<leader>lr",
+            close = "<leader>lq",
+        },
+    })
+<
+
+CONFIGURATION OPTIONS ~
+
+                                                    *g:lagos_config*
+                                                        *lagos-config*
+
+api_key (string) ~
+    Your Google AI API key. You can get one from:
+    https://makersuite.google.com/app/apikey
+
+    It's recommended to set this as an environment variable:
+>
+    export GOOGLE_AI_API_KEY="your-api-key-here"
+<
+
+model (string, default: "gemini-2.5-flash") ~
+    The Gemini model to use. Available options:
+    - "gemini-2.5-flash" (faster, for quick tasks)
+    - "gemini-2.5-pro" (more capable, for complex tasks)
+
+chat_window (table) ~
+    Configuration for the chat window:
+    - width (number, default: 80) - Width of the chat window
+    - height (number, default: 20) - Height of the chat window
+    - position (string, default: "right") - Where to place the window
+      Options: "left", "right", "top", "bottom"
+    - border (string, default: "rounded") - Border style
+      Options: "none", "single", "double", "rounded", "solid"
+
+mappings (table) ~
+    Key mappings for Lagos commands. Set to `false` to disable a mapping.
+    See |lagos-mappings| for the default mappings.
+
+==============================================================================
+5. COMMANDS                                          *lagos-commands*
+
+:LagosAsk [{query}]                              *:LagosAsk*
+    Ask a question to the AI. If {query} is provided, it's sent directly.
+    Otherwise, opens input mode to enter the question.
+
+:LagosChat                                        *:LagosChat*
+    Open or focus the chat window for interactive conversation.
+
+:LagosExplain                                    *:LagosExplain*
+    Explain the currently selected text or the line under the cursor.
+
+:LagosFix                                        *:LagosFix*
+    Get suggestions to fix issues in the selected code.
+
+:LagosRefactor                                   *:LagosRefactor*
+    Receive refactoring suggestions for the selected code.
+
+:LagosClose                                      *:LagosClose*
+    Close the Lagos chat window.
+
+==============================================================================
+6. KEY MAPPINGS                                     *lagos-mappings*
+
+Default key mappings (can be customized in setup):
+
+<leader>la          LagosAsk
+    Ask a question about anything
+
+<leader>lc          LagosChat
+    Open the chat window
+
+<leader>le          LagosExplain
+    Explain selected code
+
+<leader>lf          LagosFix
+    Fix issues in selected code
+
+<leader>lr          LagosRefactor
+    Refactor selected code
+
+<leader>lq          LagosClose
+    Close the chat window
+
+Note: <leader> is typically mapped to "\" by default.
+
+==============================================================================
+7. FEATURES                                           *lagos-features*
+
+CODE EXPLANATIONS ~
+Select any piece of code and press <leader>le to get a detailed explanation
+of what the code does, its purpose, and how it works.
+
+BUG FIXING ~
+When you encounter problematic code, select it and press <leader>lf to get
+suggestions on how to fix potential bugs or issues.
+
+REFACTORING ~
+Select code that could be improved and press <leader>lr to receive refactoring
+suggestions for better readability, performance, or maintainability.
+
+INTERACTIVE CHAT ~
+The chat window (<leader>lc) allows you to:
+- Have ongoing conversations about your code
+- Ask follow-up questions
+- Get context-aware assistance
+- Maintain chat history within the session
+
+QUICK QUESTIONS ~
+Use <leader>la to quickly ask questions without selecting any code. This is
+perfect for general programming queries or when you need help with a concept.
+
+==============================================================================
+8. EXAMPLES                                           *lagos-examples*
+
+Example 1: Explaining a function ~
+
+1. Select a function in visual mode
+2. Press <leader>le
+3. Lagos will explain:
+   - What the function does
+   - Its parameters and return values
+   - Any potential issues or improvements
+
+Example 2: Fixing a bug ~
+
+1. Select code that's causing issues
+2. Press <leader>lf
+3. Lagos will:
+   - Identify potential problems
+   - Suggest specific fixes
+   - Provide corrected code examples
+
+Example 3: Using the chat window ~
+
+1. Press <leader>lc to open chat
+2. Type: "How do I optimize this SQL query?"
+3. Paste the query if needed
+4. Lagos provides optimization suggestions
+
+Example 4: Refactoring ~
+
+1. Select a long or complex function
+2. Press <leader>lr
+3. Lagos might suggest:
+   - Breaking it into smaller functions
+   - Using more descriptive variable names
+   - Applying design patterns
+   - Improving error handling
+
+==============================================================================
+9. TROUBLESHOOTING                              *lagos-troubleshooting*
+
+COMMON ISSUES ~
+
+API key not working ~
+- Ensure your API key is valid and active
+- Check that you've set the GOOGLE_AI_API_KEY environment variable
+- Verify you have internet connectivity
+
+Plugin not loading ~
+- Check that the plugin is in your runtime path
+- Ensure you're using NeoVim 0.5.0 or newer
+- Run `:lua require('lagos').setup()` to manually initialize
+
+Chat window not appearing ~
+- Check that you have sufficient screen space
+- Try adjusting the width/height in configuration
+- Ensure the window position is valid
+
+Responses are slow ~
+- Consider using "gemini-2.5-flash" for faster responses
+- Check your internet connection speed
+- Large code selections may take longer to process
+
+DEBUG MODE ~
+
+Enable debug logging by setting:
+>
+    vim.g.lagos_debug = true
+<
+
+Check messages with `:messages` to see debug output.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
