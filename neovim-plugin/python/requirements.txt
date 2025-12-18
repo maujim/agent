@@ -1,0 +1,6 @@
+# Dependencies for Lagos NeoVim Plugin
+dspy-ai>=3.0.4
+google-genai>=1.56.0
+python-dotenv>=1.2.1
+rich>=14.2.0
+ty>=0.0.2
